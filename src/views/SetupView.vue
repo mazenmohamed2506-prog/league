@@ -77,9 +77,9 @@ const handleGenerateFixtures = () => {
       </div>
     </div>
 
-    <div class="bg-white rounded-xl shadow-sm border border-slate-200 overflow-hidden">
+    <div v-if="settings.type === 'league'" class="bg-white rounded-xl shadow-sm border border-slate-200 overflow-hidden">
       <div class="px-6 py-5 border-b border-slate-200 bg-slate-50/50">
-        <h2 class="text-xl font-semibold text-slate-800">Tournament Settings</h2>
+        <h2 class="text-xl font-semibold text-slate-800">League Settings</h2>
         <p class="text-sm text-slate-500 mt-1">Configure points awarded for matches.</p>
       </div>
       <div class="p-6">
@@ -95,6 +95,32 @@ const handleGenerateFixtures = () => {
           <div>
             <label class="block text-sm font-medium text-slate-700 mb-2">Points for Loss</label>
             <input v-model.number="settings.lossPoints" type="number" class="w-full px-4 py-2 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 transition-all">
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div v-if="settings.type === 'cup'" class="bg-white rounded-xl shadow-sm border border-slate-200 overflow-hidden">
+      <div class="px-6 py-5 border-b border-slate-200 bg-slate-50/50">
+        <h2 class="text-xl font-semibold text-slate-800">Cup Settings</h2>
+        <p class="text-sm text-slate-500 mt-1">Configure your knockout tournament.</p>
+      </div>
+      <div class="p-6">
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+          <div>
+            <label class="block text-sm font-medium text-slate-700 mb-2">Matchups Selection</label>
+            <select v-model="settings.cupFormat" class="w-full px-4 py-2 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 transition-all bg-white">
+              <option value="random">Random Draw (قرعة عشوائية)</option>
+              <option value="manual">Manual Bracket (جدول تسلسلي)</option>
+            </select>
+            <p class="text-xs text-slate-500 mt-1">If Manual is selected, teams will be paired in the exact order you added them.</p>
+          </div>
+          <div>
+            <label class="block text-sm font-medium text-slate-700 mb-2">Match Format</label>
+            <select v-model.number="settings.cupLegs" class="w-full px-4 py-2 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 transition-all bg-white">
+              <option :value="1">Single Match (مباراة واحدة)</option>
+              <option :value="2">Two Legs - Home/Away (ذهاب وإياب)</option>
+            </select>
           </div>
         </div>
       </div>
