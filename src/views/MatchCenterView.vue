@@ -1,10 +1,12 @@
 <script setup>
-import { computed } from 'vue'
+import { ref, computed } from 'vue'
 import { storeToRefs } from 'pinia'
 import { useTournamentStore } from '@/stores/tournament'
 
 const store = useTournamentStore()
 const { matches, teams } = storeToRefs(store)
+
+const searchQuery = ref('')
 
 const getTeamName = (id) => {
   if (id === 'bye') return 'Bye'
@@ -15,7 +17,18 @@ const getTeamName = (id) => {
 
 const matchesByRound = computed(() => {
   const grouped = {}
-  matches.value.forEach(match => {
+  
+  const filteredMatches = matches.value.filter(match => {
+    if (!searchQuery.value.trim()) return true
+    
+    const team1Name = getTeamName(match.team1_id).toLowerCase()
+    const team2Name = getTeamName(match.team2_id).toLowerCase()
+    const query = searchQuery.value.trim().toLowerCase()
+    
+    return team1Name.includes(query) || team2Name.includes(query)
+  })
+
+  filteredMatches.forEach(match => {
     const key = match.roundName || `Round ${match.round}`
     if (!grouped[key]) {
       grouped[key] = { round: match.round, matches: [] }
@@ -51,6 +64,22 @@ const handleSaveScore = (match) => {
       <button @click="store.resetTournament" class="text-sm text-red-500 hover:text-red-700 font-medium px-3 py-1 rounded-md hover:bg-red-50 transition-colors">
         Reset Tournament
       </button>
+    </div>
+
+    <div v-if="matches.length > 0" class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 -mt-2">
+      <div class="relative w-full sm:max-w-xs">
+        <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+          <svg class="h-5 w-5 text-slate-400" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
+            <path fill-rule="evenodd" d="M8 4a4 4 0 100 8 4 4 0 000-8zM2 8a6 6 0 1110.89 3.476l4.817 4.817a1 1 0 01-1.414 1.414l-4.816-4.816A6 6 0 012 8z" clip-rule="evenodd" />
+          </svg>
+        </div>
+        <input 
+          v-model="searchQuery" 
+          type="text" 
+          placeholder="Search by team name..." 
+          class="block w-full pl-10 pr-3 py-2 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-all text-sm"
+        >
+      </div>
     </div>
 
     <div v-if="matches.length === 0" class="bg-white rounded-xl shadow-sm border border-slate-200 p-12 text-center">
