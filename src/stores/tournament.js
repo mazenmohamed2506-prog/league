@@ -115,7 +115,7 @@ export const useTournamentStore = defineStore('tournament', () => {
               id: Date.now().toString() + '_' + round + '_' + i,
               round: round + 1, roundName: `Matchday ${round + 1}`,
               team1_id: t1.id, team2_id: t2.id,
-              score1: null, score2: null, isPlayed: false, isKnockout: false
+              score1: null, score2: null, isPlayed: false, isKnockout: false, legs: 1
             })
           }
         }
