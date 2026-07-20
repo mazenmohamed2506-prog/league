@@ -3,8 +3,70 @@ import { computed } from 'vue'
 import { useStorage } from '@vueuse/core'
 
 export const useTournamentStore = defineStore('tournament', () => {
-  const tournaments = useStorage('app_tournaments', [])
+  let activeIdRef = null;
+  let updateState = null;
+
+  const customStorage = {
+    getItem(key) {
+      return localStorage.getItem(key)
+    },
+    setItem(key, value) {
+      try {
+        localStorage.setItem(key, value)
+      } catch (e) {
+        if (e && (e.name === 'QuotaExceededError' || e.name === 'NS_ERROR_DOM_QUOTA_REACHED' || e.code === 22 || e.code === 1014)) {
+          try {
+            let parsed = JSON.parse(value)
+            if (Array.isArray(parsed) && parsed.length > 0) {
+              let saved = false;
+              let activeId = activeIdRef ? activeIdRef.value : null;
+              
+              while (parsed.length > 1) {
+                let indexToRemove = parsed.findIndex(t => t.id !== activeId);
+                if (indexToRemove === -1) {
+                  parsed.shift();
+                } else {
+                  parsed.splice(indexToRemove, 1);
+                }
+                
+                try {
+                  const newVal = JSON.stringify(parsed)
+                  localStorage.setItem(key, newVal)
+                  saved = true;
+                  break;
+                } catch (innerErr) {
+                  // Keep removing
+                }
+              }
+              if (saved && updateState) {
+                updateState(parsed);
+              }
+            }
+          } catch (parseErr) {
+            console.error('Error handling QuotaExceeded:', parseErr)
+          }
+        } else {
+          console.error('Storage error:', e)
+        }
+      }
+    },
+    removeItem(key) {
+      localStorage.removeItem(key)
+    }
+  }
+
+  const tournaments = useStorage('app_tournaments', [], customStorage)
   const activeTournamentId = useStorage('app_active_tournament_id', null)
+  
+  activeIdRef = activeTournamentId;
+  updateState = (parsed) => {
+    setTimeout(() => {
+      tournaments.value = parsed
+      if (activeTournamentId.value && !parsed.find(t => t.id === activeTournamentId.value)) {
+        activeTournamentId.value = parsed.length ? parsed[parsed.length - 1].id : null
+      }
+    }, 0)
+  }
 
   const activeTournament = computed(() => tournaments.value.find(t => t.id === activeTournamentId.value) || null)
 
