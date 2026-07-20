@@ -37,6 +37,12 @@ const handleGenerateFixtures = () => {
   store.generateFixtures()
   router.push('/matches')
 }
+
+const handleResetTournament = () => {
+  if (confirm('Are you sure you want to reset the tournament? This will delete all matches and scores.')) {
+    store.resetTournament()
+  }
+}
 </script>
 
 <template>
@@ -47,7 +53,7 @@ const handleGenerateFixtures = () => {
         <p class="text-sm text-slate-500 mt-1">Add or remove teams participating in the tournament.</p>
       </div>
       <div class="p-6">
-        <form @submit.prevent="handleAddTeam" class="flex flex-col sm:flex-row gap-3 mb-6">
+        <form v-if="matches.length === 0" @submit.prevent="handleAddTeam" class="flex flex-col sm:flex-row gap-3 mb-6">
           <input 
             v-model="newTeamName" 
             type="text" 
@@ -67,7 +73,7 @@ const handleGenerateFixtures = () => {
         <ul v-else class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-3">
           <li v-for="team in teams" :key="team.id" class="flex justify-between items-center px-4 py-3 bg-slate-50 border border-slate-200 rounded-lg group hover:border-indigo-200 transition-colors">
             <span class="font-medium text-slate-700">{{ team.name }}</span>
-            <button @click="handleRemoveTeam(team.id)" class="text-slate-400 hover:text-red-500 transition-colors p-1" title="Remove Team">
+            <button v-if="matches.length === 0" @click="handleRemoveTeam(team.id)" class="text-slate-400 hover:text-red-500 transition-colors p-1" title="Remove Team">
               <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
                 <path fill-rule="evenodd" d="M9 2a1 1 0 00-.894.553L7.382 4H4a1 1 0 000 2v10a2 2 0 002 2h8a2 2 0 002-2V6a1 1 0 100-2h-3.382l-.724-1.447A1 1 0 0011 2H9zM7 8a1 1 0 012 0v6a1 1 0 11-2 0V8zm5-1a1 1 0 00-1 1v6a1 1 0 102 0V8a1 1 0 00-1-1z" clip-rule="evenodd" />
               </svg>
@@ -86,15 +92,15 @@ const handleGenerateFixtures = () => {
         <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
           <div>
             <label class="block text-sm font-medium text-slate-700 mb-2">Points for Win</label>
-            <input v-model.number="settings.winPoints" type="number" class="w-full px-4 py-2 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 transition-all">
+            <input v-model.number="settings.winPoints" :disabled="matches.length > 0" type="number" class="w-full px-4 py-2 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 transition-all disabled:bg-slate-100 disabled:text-slate-500">
           </div>
           <div>
             <label class="block text-sm font-medium text-slate-700 mb-2">Points for Draw</label>
-            <input v-model.number="settings.drawPoints" type="number" class="w-full px-4 py-2 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 transition-all">
+            <input v-model.number="settings.drawPoints" :disabled="matches.length > 0" type="number" class="w-full px-4 py-2 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 transition-all disabled:bg-slate-100 disabled:text-slate-500">
           </div>
           <div>
             <label class="block text-sm font-medium text-slate-700 mb-2">Points for Loss</label>
-            <input v-model.number="settings.lossPoints" type="number" class="w-full px-4 py-2 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 transition-all">
+            <input v-model.number="settings.lossPoints" :disabled="matches.length > 0" type="number" class="w-full px-4 py-2 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 transition-all disabled:bg-slate-100 disabled:text-slate-500">
           </div>
         </div>
       </div>
@@ -109,7 +115,7 @@ const handleGenerateFixtures = () => {
         <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
           <div>
             <label class="block text-sm font-medium text-slate-700 mb-2">Matchups Selection</label>
-            <select v-model="settings.cupFormat" class="w-full px-4 py-2 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 transition-all bg-white">
+            <select v-model="settings.cupFormat" :disabled="matches.length > 0" class="w-full px-4 py-2 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 transition-all bg-white disabled:bg-slate-100 disabled:text-slate-500">
               <option value="random">Random Draw (قرعة عشوائية)</option>
               <option value="manual">Manual Bracket (جدول تسلسلي)</option>
             </select>
@@ -117,7 +123,7 @@ const handleGenerateFixtures = () => {
           </div>
           <div>
             <label class="block text-sm font-medium text-slate-700 mb-2">Match Format</label>
-            <select v-model.number="settings.cupLegs" class="w-full px-4 py-2 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 transition-all bg-white">
+            <select v-model.number="settings.cupLegs" :disabled="matches.length > 0" class="w-full px-4 py-2 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 transition-all bg-white disabled:bg-slate-100 disabled:text-slate-500">
               <option :value="1">Single Match (مباراة واحدة)</option>
               <option :value="2">Two Legs - Home/Away (ذهاب وإياب)</option>
             </select>
@@ -142,12 +148,20 @@ const handleGenerateFixtures = () => {
         </svg>
         <span class="font-medium">Fixtures have been successfully generated for this tournament.</span>
       </div>
-      <RouterLink 
-        to="/matches" 
-        class="w-full sm:w-auto px-6 py-2 bg-indigo-600 hover:bg-indigo-700 text-white font-medium rounded-lg transition-colors shadow-sm text-center"
-      >
-        Go to Match Center
-      </RouterLink>
+      <div class="flex flex-col sm:flex-row gap-3 w-full sm:w-auto">
+        <button 
+          @click="handleResetTournament" 
+          class="w-full sm:w-auto px-6 py-2 bg-red-50 hover:bg-red-100 text-red-600 font-medium rounded-lg border border-red-200 transition-colors shadow-sm text-center"
+        >
+          Reset Tournament
+        </button>
+        <RouterLink 
+          to="/matches" 
+          class="w-full sm:w-auto px-6 py-2 bg-indigo-600 hover:bg-indigo-700 text-white font-medium rounded-lg transition-colors shadow-sm text-center"
+        >
+          Go to Match Center
+        </RouterLink>
+      </div>
     </div>
   </div>
 </template>
