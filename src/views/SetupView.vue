@@ -5,7 +5,7 @@ import { useTournamentStore } from '@/stores/tournament'
 import { useRouter } from 'vue-router'
 
 const store = useTournamentStore()
-const { teams, settings } = storeToRefs(store)
+const { teams, settings, matches } = storeToRefs(store)
 const router = useRouter()
 
 const newTeamName = ref('')
@@ -47,14 +47,14 @@ const handleGenerateFixtures = () => {
         <p class="text-sm text-slate-500 mt-1">Add or remove teams participating in the tournament.</p>
       </div>
       <div class="p-6">
-        <form @submit.prevent="handleAddTeam" class="flex gap-3 mb-6">
+        <form @submit.prevent="handleAddTeam" class="flex flex-col sm:flex-row gap-3 mb-6">
           <input 
             v-model="newTeamName" 
             type="text" 
             placeholder="Enter team name..." 
-            class="flex-1 px-4 py-2 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-all"
+            class="flex-1 w-full px-4 py-2 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-all"
           >
-          <button type="submit" class="px-5 py-2 bg-indigo-600 hover:bg-indigo-700 text-white font-medium rounded-lg transition-colors shadow-sm">
+          <button type="submit" class="w-full sm:w-auto px-5 py-2 bg-indigo-600 hover:bg-indigo-700 text-white font-medium rounded-lg transition-colors shadow-sm">
             Add Team
           </button>
         </form>
@@ -126,7 +126,7 @@ const handleGenerateFixtures = () => {
       </div>
     </div>
 
-    <div class="flex justify-end pt-4">
+    <div class="flex justify-end pt-4" v-if="matches.length === 0">
       <button 
         @click="handleGenerateFixtures" 
         :disabled="teams.length < 2"
@@ -134,6 +134,20 @@ const handleGenerateFixtures = () => {
       >
         Generate Fixtures 🚀
       </button>
+    </div>
+    <div class="flex flex-col sm:flex-row justify-between items-center gap-4 pt-4 bg-slate-50 p-4 rounded-xl border border-slate-200 mt-4 text-center sm:text-left" v-else>
+      <div class="flex flex-col sm:flex-row items-center gap-3 text-slate-700">
+        <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-green-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+        </svg>
+        <span class="font-medium">Fixtures have been successfully generated for this tournament.</span>
+      </div>
+      <RouterLink 
+        to="/matches" 
+        class="w-full sm:w-auto px-6 py-2 bg-indigo-600 hover:bg-indigo-700 text-white font-medium rounded-lg transition-colors shadow-sm text-center"
+      >
+        Go to Match Center
+      </RouterLink>
     </div>
   </div>
 </template>

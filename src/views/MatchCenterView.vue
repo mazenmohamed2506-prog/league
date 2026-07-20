@@ -56,12 +56,12 @@ const handleSaveScore = (match) => {
 
 <template>
   <div class="space-y-8 animate-fade-in">
-    <div class="flex justify-between items-end border-b border-slate-200 pb-4">
+    <div class="flex flex-col sm:flex-row sm:justify-between sm:items-end gap-4 border-b border-slate-200 pb-4 text-center sm:text-left">
       <div>
         <h2 class="text-3xl font-bold text-slate-800">Match Center</h2>
         <p class="text-slate-500 mt-1">Record the results for all tournament fixtures.</p>
       </div>
-      <button @click="store.resetTournament" class="text-sm text-red-500 hover:text-red-700 font-medium px-3 py-1 rounded-md hover:bg-red-50 transition-colors">
+      <button @click="store.resetTournament" class="w-full sm:w-auto text-sm text-red-500 border border-red-200 sm:border-transparent hover:text-red-700 font-medium px-3 py-2 sm:py-1 rounded-md hover:bg-red-50 transition-colors">
         Reset Tournament
       </button>
     </div>
@@ -82,13 +82,13 @@ const handleSaveScore = (match) => {
       </div>
     </div>
 
-    <div v-if="matches.length === 0" class="bg-white rounded-xl shadow-sm border border-slate-200 p-12 text-center">
+    <div v-if="matches.length === 0" class="bg-white rounded-xl shadow-sm border border-slate-200 p-8 sm:p-12 text-center">
       <div class="w-16 h-16 bg-slate-100 rounded-full flex items-center justify-center mx-auto mb-4">
         <span class="text-2xl">📅</span>
       </div>
       <h3 class="text-lg font-medium text-slate-800 mb-2">No fixtures generated yet</h3>
-      <p class="text-slate-500 mb-6">Go to the setup page to add teams and generate the schedule.</p>
-      <RouterLink to="/setup" class="px-6 py-2 bg-indigo-600 hover:bg-indigo-700 text-white font-medium rounded-lg transition-colors">
+      <p class="text-slate-500 mb-6 text-sm sm:text-base">Go to the setup page to add teams and generate the schedule.</p>
+      <RouterLink to="/setup" class="w-full sm:w-auto inline-block px-6 py-2 bg-indigo-600 hover:bg-indigo-700 text-white font-medium rounded-lg transition-colors">
         Go to Setup
       </RouterLink>
     </div>
